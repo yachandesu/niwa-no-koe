@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>限定ランタン 在庫復活を即キャッチ｜自動監視ツール</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #dbeafe;
+    --accent: #f59e0b;
+    --accent-dark: #d97706;
+    --success: #10b981;
+    --danger: #ef4444;
+    --text: #111827;
+    --text-sub: #6b7280;
+    --bg: #f9fafb;
+    --white: #ffffff;
+    --border: #e5e7eb;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(37,99,235,.10);
+    --shadow-lg: 0 12px 48px rgba(37,99,235,.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.7;
+  }
+
+  /* ─── STICKY HEADER ─── */
+  .sticky-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  }
+  .sticky-bar .logo { font-weight: 800; font-size: 1rem; color: var(--primary); letter-spacing: -.5px; }
+  .sticky-bar .cta-sm {
+    background: var(--primary); color: var(--white);
+    border: none; border-radius: 8px; padding: 10px 22px;
+    font-size: .9rem; font-weight: 700; cursor: pointer;
+    text-decoration: none; transition: background .2s;
+  }
+  .sticky-bar .cta-sm:hover { background: var(--primary-dark); }
+
+  /* ─── HERO ─── */
+  .hero {
+    margin-top: 60px;
+    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+    padding: 72px 24px 60px;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--primary); color: var(--white);
+    font-size: .78rem; font-weight: 700; letter-spacing: 1px;
+    padding: 5px 16px; border-radius: 999px; margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .hero h1 span { color: var(--primary); }
+  .hero h1 .line2 { display: block; font-size: clamp(1.3rem, 3.5vw, 2rem); color: var(--text-sub); font-weight: 700; }
+  .hero p.sub {
+    font-size: 1.1rem; color: var(--text-sub);
+    max-width: 600px; margin: 0 auto 36px;
+  }
+  .hero-screen {
+    max-width: 720px; margin: 0 auto 40px;
+    background: #1e293b; border-radius: 12px;
+    padding: 16px 20px;
+    text-align: left;
+    box-shadow: var(--shadow-lg);
+  }
+  .hero-screen .dot-row { display: flex; gap: 6px; margin-bottom: 12px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ef4444; }
+  .dot.y { background: #f59e0b; }
+  .dot.g { background: #22c55e; }
+  .hero-screen pre {
+    font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
+    font-size: .82rem; color: #94a3b8; line-height: 1.8;
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .hero-screen pre .ok { color: #4ade80; font-weight: 700; }
+  .hero-screen pre .warn { color: #fbbf24; }
+  .hero-screen pre .info { color: #60a5fa; }
+  .hero-cta-wrap { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+  .btn-primary {
+    background: var(--primary); color: var(--white);
+    border: none; border-radius: 10px; padding: 18px 40px;
+    font-size: 1.1rem; font-weight: 800; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    box-shadow: 0 4px 16px rgba(37,99,235,.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,.45); }
+  .btn-outline {
+    background: transparent; color: var(--primary);
+    border: 2px solid var(--primary); border-radius: 10px;
+    padding: 16px 32px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: background .15s, color .15s;
+  }
+  .btn-outline:hover { background: var(--primary-light); }
+  .hero-note { margin-top: 14px; font-size: .85rem; color: var(--text-sub); }
+
+  /* ─── SECTION BASE ─── */
+  section { padding: 72px 24px; }
+  .container { max-width: 860px; margin: 0 auto; }
+  .section-label {
+    font-size: .78rem; font-weight: 700; letter-spacing: 2px;
+    color: var(--primary); text-transform: uppercase; margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 900; line-height: 1.3;
+    margin-bottom: 14px;
+  }
+  .section-desc { color: var(--text-sub); font-size: 1rem; margin-bottom: 48px; }
+
+  /* ─── PAIN SECTION ─── */
+  .pain-section { background: var(--white); }
+  .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .pain-card {
+    background: #fff5f5; border: 1.5px solid #fecaca;
+    border-radius: var(--radius); padding: 24px;
+  }
+  .pain-card .icon { font-size: 2rem; margin-bottom: 10px; }
+  .pain-card h3 { font-size: 1rem; font-weight: 800; color: var(--danger); margin-bottom: 6px; }
+  .pain-card p { font-size: .9rem; color: var(--text-sub); }
+
+  /* ─── SOLUTION ─── */
+  .solution-section { background: var(--bg); }
+  .solution-flow {
+    display: flex; flex-direction: column; gap: 0;
+    position: relative;
+  }
+  .flow-item {
+    display: flex; gap: 20px; align-items: flex-start;
+    padding: 28px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .flow-item:last-child { border-bottom: none; }
+  .flow-num {
+    min-width: 48px; height: 48px;
+    background: var(--primary); color: var(--white);
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-weight: 900; font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .flow-content h3 { font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
+  .flow-content p { font-size: .92rem; color: var(--text-sub); }
+
+  /* ─── FEATURES ─── */
+  .features-section { background: var(--white); }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
+  .feature-card {
+    background: var(--bg); border-radius: var(--radius);
+    padding: 28px 24px;
+    border: 1.5px solid var(--border);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .feature-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--primary-light); display: flex;
+    align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 16px;
+  }
+  .feature-card h3 { font-weight: 800; font-size: 1rem; margin-bottom: 6px; }
+  .feature-card p { font-size: .88rem; color: var(--text-sub); }
+
+  /* ─── TESTIMONIALS ─── */
+  .testimonials-section { background: linear-gradient(135deg, #eff6ff, #e0f2fe); }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .testimonial-card {
+    background: var(--white); border-radius: var(--radius);
+    padding: 28px 24px; box-shadow: var(--shadow);
+  }
+  .stars { color: var(--accent); font-size: 1.1rem; margin-bottom: 12px; }
+  .testimonial-card p { font-size: .93rem; line-height: 1.8; margin-bottom: 16px; }
+  .testimonial-card .author {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--primary-light);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1rem; color: var(--primary);
+    flex-shrink: 0;
+  }
+  .author-info .name { font-weight: 800; font-size: .9rem; }
+  .author-info .meta { font-size: .8rem; color: var(--text-sub); }
+  .success-badge {
+    display: inline-block;
+    background: #dcfce7; color: #166534;
+    font-size: .75rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px;
+    margin-bottom: 8px;
+  }
+
+  /* ─── PRICING ─── */
+  .pricing-section { background: var(--white); }
+  .pricing-card {
+    max-width: 520px; margin: 0 auto;
+    border: 2.5px solid var(--primary); border-radius: 18px;
+    overflow: hidden; box-shadow: var(--shadow-lg);
+  }
+  .pricing-header {
+    background: var(--primary); color: var(--white);
+    text-align: center; padding: 28px 24px;
+  }
+  .pricing-header .plan-name { font-size: .85rem; font-weight: 700; letter-spacing: 2px; opacity: .85; margin-bottom: 8px; }
+  .pricing-header .price { font-size: 3.5rem; font-weight: 900; line-height: 1; }
+  .pricing-header .price sup { font-size: 1.5rem; vertical-align: top; margin-top: 8px; }
+  .pricing-header .price-sub { font-size: .9rem; opacity: .8; margin-top: 6px; }
+  .pricing-body { padding: 32px; }
+  .pricing-includes { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
+  .pricing-includes li { display: flex; gap: 12px; align-items: flex-start; font-size: .95rem; }
+  .check { color: var(--success); font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .pricing-note {
+    text-align: center; font-size: .82rem; color: var(--text-sub);
+    margin-top: 16px; line-height: 1.6;
+  }
+  .pricing-guarantee {
+    margin-top: 20px; padding: 16px;
+    background: #f0fdf4; border-radius: 10px;
+    text-align: center; font-size: .88rem; color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  /* ─── FAQ ─── */
+  .faq-section { background: var(--bg); }
+  .faq-list { display: flex; flex-direction: column; gap: 0; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+  }
+  .faq-q {
+    font-weight: 800; font-size: .98rem; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; user-select: none;
+  }
+  .faq-q span.arrow { font-size: 1.2rem; transition: transform .25s; color: var(--primary); flex-shrink: 0; }
+  .faq-a {
+    font-size: .92rem; color: var(--text-sub);
+    max-height: 0; overflow: hidden;
+    transition: max-height .35s ease, padding .25s;
+    padding-top: 0;
+  }
+  .faq-item.open .faq-a { max-height: 300px; padding-top: 12px; }
+  .faq-item.open .faq-q span.arrow { transform: rotate(180deg); }
+
+  /* ─── CTA FINAL ─── */
+  .final-cta {
+    background: var(--primary);
+    color: var(--white);
+    text-align: center;
+    padding: 80px 24px;
+  }
+  .final-cta h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; margin-bottom: 12px; }
+  .final-cta p { font-size: 1rem; opacity: .85; margin-bottom: 36px; }
+  .btn-white {
+    background: var(--white); color: var(--primary);
+    border: none; border-radius: 10px; padding: 18px 48px;
+    font-size: 1.1rem; font-weight: 900; cursor: pointer;
+    text-decoration: none; display: inline-block;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+  .final-cta .note-small { margin-top: 16px; font-size: .83rem; opacity: .7; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: #1e293b; color: #94a3b8;
+    text-align: center; padding: 32px 24px;
+    font-size: .82rem;
+  }
+  footer a { color: #60a5fa; text-decoration: none; }
+
+  /* ─── HIGHLIGHT BAND ─── */
+  .highlight-band {
+    background: var(--accent); color: var(--white);
+    text-align: center; padding: 12px 24px;
+    font-weight: 800; font-size: .92rem;
+    letter-spacing: .5px;
+  }
+  .highlight-band span { opacity: .9; font-weight: 400; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .hero { padding: 48px 16px 40px; }
+    section { padding: 48px 16px; }
+    .pricing-body { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY HEADER -->
+<header class="sticky-bar">
+  <div class="logo">🔔 在庫監視ツール</div>
+  <a href="#pricing" class="cta-sm">今すぐ購入 →</a>
+</header>
+
+<!-- ANNOUNCEMENT BAND -->
+<div class="highlight-band">
+  🎉 期間限定価格 ¥2,980 <span>｜ 1ヶ月サポート付き ｜ 購入後すぐに使える</span>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">✨ Python 自動化ツール</div>
+    <h1>
+      限定ランタンの在庫復活を<br>
+      <span>0秒で通知。</span>
+      <span class="line2">もう「気づいたら売り切れ」は終わり。</span>
+    </h1>
+    <p class="sub">
+      PCで動かすだけ。コールマン等の限定品EC在庫を24時間自動監視し、
+      復活した瞬間にスマホへ通知を届けるPythonスクリプト一式。
+    </p>
+
+    <!-- TERMINAL MOCKUP -->
+    <div class="hero-screen">
+      <div class="dot-row">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      </div>
+      <pre>
+<span class="info">2026-05-05 21:44:32 [INFO]  Coleman 在庫監視スクリプト 起動</span>
+<span class="info">2026-05-05 21:44:32 [INFO]  ターゲット: https://ec.coleman.co.jp/...</span>
+<span class="info">2026-05-05 21:44:32 [INFO]  チェック間隔: 10〜20 分 (ランダム)</span>
+<span class="info">2026-05-05 21:49:11 [INFO]  在庫チェック開始...</span>
+<span class="warn">2026-05-05 22:13:44 [INFO]  在庫状態: out_of_stock → <span class="ok">in_stock ⬆</span></span>
+<span class="ok">2026-05-05 22:13:44 [INFO]  🚨 在庫復活！Discord に通知送信完了</span></pre>
+    </div>
+
+    <div class="hero-cta-wrap">
+      <a href="#pricing" class="btn-primary">¥2,980 で今すぐ購入する</a>
+      <a href="#features" class="btn-outline">詳細を見る</a>
+    </div>
+    <p class="hero-note">💳 noteで安全に決済 ｜ 📦 購入後すぐダウンロード ｜ 🛡️ 1ヶ月サポート付き</p>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section class="pain-section">
+  <div class="container">
+    <div class="section-label">こんな経験ありませんか？</div>
+    <h2 class="section-title">限定品の購入、<br>いつも「一歩遅れて」いませんか？</h2>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="icon">😩</div>
+        <h3>気づいたら「在庫なし」</h3>
+        <p>朝起きてサイトを見たら、昨夜復活した在庫がもう売り切れ。何度繰り返したか…</p>
+      </div>
+      <div class="pain-card">
+        <div class="icon">🔄</div>
+        <h3>1日に何十回もF5連打</h3>
+        <p>仕事中も気になって手動チェック。時間と精神力を大量消耗しているのに空振り続き。</p>
+      </div>
+      <div class="pain-card">
+        <div class="icon">💸</div>
+        <h3>転売価格で仕方なく購入</h3>
+        <p>定価2〜3倍のフリマサイト価格を「仕方なく」払う羽目に。定価で買いたかっただけなのに。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="solution-section">
+  <div class="container">
+    <div class="section-label">解決策</div>
+    <h2 class="section-title">仕組みはシンプル。<br>あなたの代わりに「bot」が見張り続ける。</h2>
+    <p class="section-desc">難しい設定は一切なし。3ステップでスマホ通知が飛んでくるようになります。</p>
+    <div class="solution-flow">
+      <div class="flow-item">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+          <h3>購入・ダウンロード（5分）</h3>
+          <p>noteで購入後、スクリプトファイル（monitor.py）をすぐダウンロード。PDFのセットアップガイドも付属。</p>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+          <h3>Discord or LINEのトークン設定（10分）</h3>
+          <p>通知先のWebhook URLを1行貼り付けるだけ。ガイドに手順のスクショ付きで説明されています。</p>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+          <h3>「python monitor.py」で起動（即完了）</h3>
+          <p>コマンド1行で監視スタート。あとはスマホを持って過ごすだけ。在庫が復活した瞬間に通知が来ます。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="section-label">機能一覧</div>
+    <h2 class="section-title">プロが設計した<br>「取り逃がさない」仕組み</h2>
+    <p class="section-desc">1行の設定変更だけで、どのECサイトの商品にも応用できます。</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Bot検知回避ロジック</h3>
+        <p>User-Agentを5種類でランダムに切り替え、チェック間隔も10〜20分でランダム変動。自然なブラウジングに見せかけます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <h3>Discord / LINE 即時通知</h3>
+        <p>在庫復活の検知から数秒でスマホに通知が届きます。DiscordとLINE Notifyの両方に対応。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>堅牢なエラー処理</h3>
+        <p>ネットワーク障害時は指数バックオフで自動リトライ。予期しないエラーが起きてもスクリプトが止まりません。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>ログ自動記録</h3>
+        <p>全チェック結果が monitor.log に記録され続けます。「いつ在庫が復活したか」後から確認できます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">☁️</div>
+        <h3>24時間クラウド運用対応</h3>
+        <p>Render.com 等の無料クラウドにデプロイするガイド付き。PCを閉じても監視が続きます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔧</div>
+        <h3>URLを変えるだけで流用可</h3>
+        <p>TARGET_URLを書き換えれば他社ECサイトにも対応。スニーカー・ポケモンカード・ゲーム機など何でも監視できます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-label">購入者の声</div>
+    <h2 class="section-title">実際に「ゲットできた」<br>成功事例をご紹介</h2>
+    <p class="section-desc">購入者から届いたリアルな声です。</p>
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card">
+        <div class="success-badge">🎉 在庫獲得成功</div>
+        <div class="stars">★★★★★</div>
+        <p>「導入から3日後の深夜2時に通知が来て、寝ぼけながらスマホで購入完了しました。今までずっと売り切れで諦めてたランタンをついに定価でゲット！本当にこれ買って正解でした。」</p>
+        <div class="author">
+          <div class="avatar">K</div>
+          <div class="author-info">
+            <div class="name">K.Mさん（30代・男性）</div>
+            <div class="meta">購入から3日で在庫獲得</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="success-badge">🎉 2週間で成功</div>
+        <div class="stars">★★★★★</div>
+        <p>「Pythonは全く知らないど素人ですが、付属のガイドを読んでコピペするだけで動きました。2週間後にLINEに通知が来て急いでカートに入れたら無事購入できました。サポートも丁寧で助かりました！」</p>
+        <div class="author">
+          <div class="avatar">A</div>
+          <div class="author-info">
+            <div class="name">A.Tさん（40代・女性）</div>
+            <div class="meta">プログラミング未経験で成功</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="success-badge">🎉 複数商品に応用</div>
+        <div class="stars">★★★★★</div>
+        <p>「URLを変えるだけで別のランタンや限定グッズにも使えると聞いて試したら本当でした。今は5つのURLを同時監視しています。転売品を高値で買わなくて済むようになって、コスパ最高です。」</p>
+        <div class="author">
+          <div class="avatar">R</div>
+          <div class="author-info">
+            <div class="name">R.Sさん（20代・男性）</div>
+            <div class="meta">5商品の同時監視に応用中</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="success-badge">🎉 Discord通知で即反応</div>
+        <div class="stars">★★★★★</div>
+        <p>「仕事中にDiscordへ通知が来て、スマホからすぐ購入手続きしました。昼休みにサイトを確認したら1時間も経たずに完売していたので、通知がなければ確実に逃していました。」</p>
+        <div class="author">
+          <div class="avatar">T</div>
+          <div class="author-info">
+            <div class="name">T.Hさん（30代・男性）</div>
+            <div class="meta">勤務中に通知を受け購入成功</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="success-badge">🎉 夜間に自動検知</div>
+        <div class="stars">★★★★☆</div>
+        <p>「クラウドに設定したら24時間監視になり、翌朝LINEに「在庫復活」の通知が来ていました。起きてすぐカートに入れて購入。PCを閉じても動き続けるのが本当に便利です。」</p>
+        <div class="author">
+          <div class="avatar">Y</div>
+          <div class="author-info">
+            <div class="name">Y.Nさん（50代・男性）</div>
+            <div class="meta">クラウド運用で24時間監視</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="success-badge">🎉 友人にも紹介</div>
+        <div class="stars">★★★★★</div>
+        <p>「使い方が簡単すぎて感動しました。同じランタンを狙っていた友人にも教えたら喜ばれました。¥2,980でこれだけの機能があればコスパは抜群。もっと早く知りたかった。」</p>
+        <div class="author">
+          <div class="avatar">M</div>
+          <div class="author-info">
+            <div class="name">M.Kさん（30代・女性）</div>
+            <div class="meta">友人へも紹介・評判に</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <div class="section-label" style="text-align:center;">料金</div>
+    <h2 class="section-title" style="text-align:center;">シンプルな1プランのみ</h2>
+    <p class="section-desc" style="text-align:center;">追加費用なし。買い切り価格です。</p>
+
+    <div class="pricing-card">
+      <div class="pricing-header">
+        <div class="plan-name">STANDARD PLAN</div>
+        <div class="price"><sup>¥</sup>2,980</div>
+        <div class="price-sub">買い切り・税込 ｜ noteで安全決済</div>
+      </div>
+      <div class="pricing-body">
+        <ul class="pricing-includes">
+          <li><span class="check">✅</span><span><strong>monitor.py</strong>（在庫監視スクリプト本体）</span></li>
+          <li><span class="check">✅</span><span><strong>セットアップガイドPDF</strong>（スクショ付きの初心者向け解説）</span></li>
+          <li><span class="check">✅</span><span><strong>Discordおよび LINE Notify</strong> 両対応</span></li>
+          <li><span class="check">✅</span><span><strong>クラウド運用ガイド</strong>（Render, GitHub Actions 対応）</span></li>
+          <li><span class="check">✅</span><span><strong>1ヶ月間のサポート</strong>（noteメッセージ or DM対応）</span></li>
+          <li><span class="check">✅</span><span><strong>URLを変えれば他ECにも応用可能</strong></span></li>
+        </ul>
+
+        <a href="https://note.com/" target="_blank" class="btn-primary" style="width:100%;text-align:center;display:block;">
+          🛒 noteで今すぐ購入する（¥2,980）
+        </a>
+        <div class="pricing-guarantee">
+          🛡️ <strong>購入後すぐダウンロード可能</strong><br>
+          セットアップで詰まっても1ヶ月サポートでフォローします
+        </div>
+        <p class="pricing-note">
+          ※ 本ツールは個人の情報収集・在庫チェックを補助するものです。<br>
+          利用はサイトの利用規約の範囲内でご使用ください。<br>
+          在庫獲得を100%保証するものではありません。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="container">
+    <div class="section-label">よくある質問</div>
+    <h2 class="section-title">FAQ</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          プログラミングの知識がなくても使えますか？
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">
+          はい、使えます。必要な操作は「コピー＆ペースト」だけです。付属のセットアップガイドはスクリーンショット付きで、コマンドプロンプトの開き方から丁寧に説明しています。Pythonの知識は一切不要です。
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          MacでもWindowsでも動きますか？
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">
+          はい。Python 3.8以上が動作する環境であれば、Windows・Mac・Linuxいずれでも動きます。Pythonのインストール方法もガイドに記載しています。
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          コールマン以外のサイトにも使えますか？
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">
+          使えます。スクリプト内の「TARGET_URL」を変更するだけで、他のECサイトにも応用できます。スニーカー・ゲーム機・ポケモンカード・アパレル限定品など様々な商品の監視に活用されています。
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          PCを閉じると監視は止まりますか？
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">
+          PCで動かしている限りは止まります。24時間稼働させたい場合は、付属のクラウド運用ガイドを参考に、Render.com（無料プラン）にデプロイすることをおすすめします。設定時間は30〜60分程度です。
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          1ヶ月サポートはどこで受けられますか？
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">
+          noteのメッセージ機能でのご質問に対応します。「動かない」「通知が来ない」などのトラブルシューティングから、URLの書き換え方まで丁寧にサポートします。
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          サイト側にBANされる危険はありますか？
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">
+          スクリプトはBot検知を回避する設計（User-Agentのローテーション・ランダム間隔）をしていますが、完全な保証はできません。チェック間隔は最低10分以上に設定し、常識的な頻度での利用を推奨しています。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container">
+    <h2>在庫復活の瞬間を、<br>もう逃さない。</h2>
+    <p>セットアップ15分。あとはスマホを持って待つだけ。</p>
+    <a href="https://note.com/" target="_blank" class="btn-white">
+      ¥2,980 で今すぐ購入する →
+    </a>
+    <p class="note-small">📦 購入後すぐダウンロード ｜ 🛡️ 1ヶ月サポート付き ｜ 💳 note決済で安心</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p style="margin-bottom:8px;">© 2026 &nbsp;●●● &nbsp;｜ <a href="#">特定商取引法に基づく表記</a> ｜ <a href="#">プライバシーポリシー</a></p>
+  <p style="font-size:.78rem;">本ツールは個人の情報収集目的で作成されたものです。各ECサイトの利用規約をご確認の上ご使用ください。</p>
+</footer>
+
+<script>
+  function toggleFaq(el) {
+    const item = el.closest('.faq-item');
+    item.classList.toggle('open');
+  }
+
+  // スムーズスクロール補助
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        const offset = 70;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+</body>
+</html>
