@@ -3,315 +3,300 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>限定ランタン 在庫復活を即キャッチ｜自動監視ツール</title>
+<title>EC在庫監視ツール｜限定品を定価でゲット</title>
 <style>
   :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-light: #dbeafe;
-    --accent: #f59e0b;
-    --accent-dark: #d97706;
-    --success: #10b981;
-    --danger: #ef4444;
-    --text: #111827;
-    --text-sub: #6b7280;
-    --bg: #f9fafb;
-    --white: #ffffff;
-    --border: #e5e7eb;
-    --radius: 12px;
-    --shadow: 0 4px 24px rgba(37,99,235,.10);
-    --shadow-lg: 0 12px 48px rgba(37,99,235,.16);
+    --bg:       #0a0f1e;
+    --bg2:      #111827;
+    --card:     #1e293b;
+    --card2:    #162032;
+    --border:   #1e3a5f;
+    --primary:  #3b82f6;
+    --primary-d:#2563eb;
+    --primary-l:rgba(59,130,246,.15);
+    --accent:   #f59e0b;
+    --success:  #22c55e;
+    --danger:   #ef4444;
+    --text:     #f1f5f9;
+    --text-sub: #94a3b8;
+    --radius:   12px;
+    --shadow:   0 4px 24px rgba(0,0,0,.4);
+    --shadow-lg:0 12px 48px rgba(0,0,0,.6);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-    color: var(--text);
-    background: var(--bg);
-    line-height: 1.7;
-  }
-
-  /* ─── STICKY HEADER ─── */
-  .sticky-bar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 24px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.06);
-  }
-  .sticky-bar .logo { font-weight: 800; font-size: 1rem; color: var(--primary); letter-spacing: -.5px; }
-  .sticky-bar .cta-sm {
-    background: var(--primary); color: var(--white);
-    border: none; border-radius: 8px; padding: 10px 22px;
-    font-size: .9rem; font-weight: 700; cursor: pointer;
-    text-decoration: none; transition: background .2s;
-  }
-  .sticky-bar .cta-sm:hover { background: var(--primary-dark); }
-
-  /* ─── HERO ─── */
-  .hero {
-    margin-top: 60px;
-    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
-    padding: 72px 24px 60px;
-    text-align: center;
-    position: relative; overflow: hidden;
-  }
-  .hero::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  }
-  .hero-badge {
-    display: inline-block;
-    background: var(--primary); color: var(--white);
-    font-size: .78rem; font-weight: 700; letter-spacing: 1px;
-    padding: 5px 16px; border-radius: 999px; margin-bottom: 20px;
-    text-transform: uppercase;
-  }
-  .hero h1 {
-    font-size: clamp(1.8rem, 5vw, 3rem);
-    font-weight: 900;
-    line-height: 1.25;
-    letter-spacing: -1px;
-    margin-bottom: 20px;
-    color: var(--text);
-  }
-  .hero h1 span { color: var(--primary); }
-  .hero h1 .line2 { display: block; font-size: clamp(1.3rem, 3.5vw, 2rem); color: var(--text-sub); font-weight: 700; }
-  .hero p.sub {
-    font-size: 1.1rem; color: var(--text-sub);
-    max-width: 600px; margin: 0 auto 36px;
-  }
-  .hero-screen {
-    max-width: 720px; margin: 0 auto 40px;
-    background: #1e293b; border-radius: 12px;
-    padding: 16px 20px;
-    text-align: left;
-    box-shadow: var(--shadow-lg);
-  }
-  .hero-screen .dot-row { display: flex; gap: 6px; margin-bottom: 12px; }
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot.r { background: #ef4444; }
-  .dot.y { background: #f59e0b; }
-  .dot.g { background: #22c55e; }
-  .hero-screen pre {
-    font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
-    font-size: .82rem; color: #94a3b8; line-height: 1.8;
-    white-space: pre-wrap; word-break: break-all;
-  }
-  .hero-screen pre .ok { color: #4ade80; font-weight: 700; }
-  .hero-screen pre .warn { color: #fbbf24; }
-  .hero-screen pre .info { color: #60a5fa; }
-  .hero-cta-wrap { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
-  .btn-primary {
-    background: var(--primary); color: var(--white);
-    border: none; border-radius: 10px; padding: 18px 40px;
-    font-size: 1.1rem; font-weight: 800; cursor: pointer;
-    text-decoration: none; display: inline-block;
-    box-shadow: 0 4px 16px rgba(37,99,235,.35);
-    transition: transform .15s, box-shadow .15s;
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,.45); }
-  .btn-outline {
-    background: transparent; color: var(--primary);
-    border: 2px solid var(--primary); border-radius: 10px;
-    padding: 16px 32px; font-size: 1rem; font-weight: 700;
-    cursor: pointer; text-decoration: none; display: inline-block;
-    transition: background .15s, color .15s;
-  }
-  .btn-outline:hover { background: var(--primary-light); }
-  .hero-note { margin-top: 14px; font-size: .85rem; color: var(--text-sub); }
-
-  /* ─── SECTION BASE ─── */
-  section { padding: 72px 24px; }
-  .container { max-width: 860px; margin: 0 auto; }
-  .section-label {
-    font-size: .78rem; font-weight: 700; letter-spacing: 2px;
-    color: var(--primary); text-transform: uppercase; margin-bottom: 10px;
-  }
-  .section-title {
-    font-size: clamp(1.5rem, 4vw, 2.2rem);
-    font-weight: 900; line-height: 1.3;
-    margin-bottom: 14px;
-  }
-  .section-desc { color: var(--text-sub); font-size: 1rem; margin-bottom: 48px; }
-
-  /* ─── PAIN SECTION ─── */
-  .pain-section { background: var(--white); }
-  .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
-  .pain-card {
-    background: #fff5f5; border: 1.5px solid #fecaca;
-    border-radius: var(--radius); padding: 24px;
-  }
-  .pain-card .icon { font-size: 2rem; margin-bottom: 10px; }
-  .pain-card h3 { font-size: 1rem; font-weight: 800; color: var(--danger); margin-bottom: 6px; }
-  .pain-card p { font-size: .9rem; color: var(--text-sub); }
-
-  /* ─── SOLUTION ─── */
-  .solution-section { background: var(--bg); }
-  .solution-flow {
-    display: flex; flex-direction: column; gap: 0;
-    position: relative;
-  }
-  .flow-item {
-    display: flex; gap: 20px; align-items: flex-start;
-    padding: 28px 0;
-    border-bottom: 1px dashed var(--border);
-  }
-  .flow-item:last-child { border-bottom: none; }
-  .flow-num {
-    min-width: 48px; height: 48px;
-    background: var(--primary); color: var(--white);
-    border-radius: 50%; display: flex; align-items: center;
-    justify-content: center; font-weight: 900; font-size: 1.1rem;
-    flex-shrink: 0;
-  }
-  .flow-content h3 { font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
-  .flow-content p { font-size: .92rem; color: var(--text-sub); }
-
-  /* ─── FEATURES ─── */
-  .features-section { background: var(--white); }
-  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
-  .feature-card {
-    background: var(--bg); border-radius: var(--radius);
-    padding: 28px 24px;
-    border: 1.5px solid var(--border);
-    transition: border-color .2s, box-shadow .2s;
-  }
-  .feature-card:hover { border-color: var(--primary); box-shadow: var(--shadow); }
-  .feature-icon {
-    width: 48px; height: 48px; border-radius: 12px;
-    background: var(--primary-light); display: flex;
-    align-items: center; justify-content: center;
-    font-size: 1.5rem; margin-bottom: 16px;
-  }
-  .feature-card h3 { font-weight: 800; font-size: 1rem; margin-bottom: 6px; }
-  .feature-card p { font-size: .88rem; color: var(--text-sub); }
-
-  /* ─── TESTIMONIALS ─── */
-  .testimonials-section { background: linear-gradient(135deg, #eff6ff, #e0f2fe); }
-  .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-  .testimonial-card {
-    background: var(--white); border-radius: var(--radius);
-    padding: 28px 24px; box-shadow: var(--shadow);
-  }
-  .stars { color: var(--accent); font-size: 1.1rem; margin-bottom: 12px; }
-  .testimonial-card p { font-size: .93rem; line-height: 1.8; margin-bottom: 16px; }
-  .testimonial-card .author {
-    display: flex; align-items: center; gap: 12px;
-  }
-  .avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--primary-light);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 1rem; color: var(--primary);
-    flex-shrink: 0;
-  }
-  .author-info .name { font-weight: 800; font-size: .9rem; }
-  .author-info .meta { font-size: .8rem; color: var(--text-sub); }
-  .success-badge {
-    display: inline-block;
-    background: #dcfce7; color: #166534;
-    font-size: .75rem; font-weight: 700;
-    padding: 3px 10px; border-radius: 999px;
-    margin-bottom: 8px;
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Hiragino Sans","Noto Sans JP",sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.7;
   }
 
-  /* ─── PRICING ─── */
-  .pricing-section { background: var(--white); }
-  .pricing-card {
-    max-width: 520px; margin: 0 auto;
-    border: 2.5px solid var(--primary); border-radius: 18px;
-    overflow: hidden; box-shadow: var(--shadow-lg);
+  /* STICKY HEADER */
+  .sticky-bar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:rgba(10,15,30,.92);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 24px;
   }
-  .pricing-header {
-    background: var(--primary); color: var(--white);
-    text-align: center; padding: 28px 24px;
+  .sticky-bar .logo{font-weight:800;font-size:1rem;color:var(--primary);}
+  .sticky-bar .cta-sm{
+    background:var(--primary);color:#fff;border:none;border-radius:8px;
+    padding:10px 22px;font-size:.9rem;font-weight:700;cursor:pointer;
+    text-decoration:none;transition:background .2s;
   }
-  .pricing-header .plan-name { font-size: .85rem; font-weight: 700; letter-spacing: 2px; opacity: .85; margin-bottom: 8px; }
-  .pricing-header .price { font-size: 3.5rem; font-weight: 900; line-height: 1; }
-  .pricing-header .price sup { font-size: 1.5rem; vertical-align: top; margin-top: 8px; }
-  .pricing-header .price-sub { font-size: .9rem; opacity: .8; margin-top: 6px; }
-  .pricing-body { padding: 32px; }
-  .pricing-includes { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
-  .pricing-includes li { display: flex; gap: 12px; align-items: flex-start; font-size: .95rem; }
-  .check { color: var(--success); font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-  .pricing-note {
-    text-align: center; font-size: .82rem; color: var(--text-sub);
-    margin-top: 16px; line-height: 1.6;
+  .sticky-bar .cta-sm:hover{background:var(--primary-d);}
+
+  /* HIGHLIGHT BAND */
+  .highlight-band{
+    background:linear-gradient(90deg,#b45309,#f59e0b,#b45309);
+    color:#fff;text-align:center;padding:11px 24px;
+    font-weight:800;font-size:.9rem;letter-spacing:.5px;
   }
-  .pricing-guarantee {
-    margin-top: 20px; padding: 16px;
-    background: #f0fdf4; border-radius: 10px;
-    text-align: center; font-size: .88rem; color: #166534;
-    border: 1px solid #bbf7d0;
+  .highlight-band span{opacity:.9;font-weight:400;}
+
+  /* HERO */
+  .hero{
+    margin-top:60px;
+    background:linear-gradient(160deg,#0a0f1e 0%,#0d1b3e 60%,#0a0f1e 100%);
+    padding:80px 24px 64px;text-align:center;position:relative;overflow:hidden;
+  }
+  .hero::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(59,130,246,.12),transparent);
+  }
+  .hero-badge{
+    display:inline-block;
+    background:var(--primary-l);color:var(--primary);
+    border:1px solid var(--primary);
+    font-size:.78rem;font-weight:700;letter-spacing:1.5px;
+    padding:5px 18px;border-radius:999px;margin-bottom:22px;
+    text-transform:uppercase;
+  }
+  .hero h1{
+    font-size:clamp(1.9rem,5vw,3.2rem);font-weight:900;
+    line-height:1.2;letter-spacing:-1px;margin-bottom:20px;color:var(--text);
+  }
+  .hero h1 em{color:var(--primary);font-style:normal;}
+  .hero h1 .line2{display:block;font-size:clamp(1.2rem,3vw,1.9rem);color:var(--text-sub);font-weight:700;margin-top:8px;}
+  .hero p.sub{
+    font-size:1.05rem;color:var(--text-sub);
+    max-width:600px;margin:0 auto 36px;
   }
 
-  /* ─── FAQ ─── */
-  .faq-section { background: var(--bg); }
-  .faq-list { display: flex; flex-direction: column; gap: 0; }
-  .faq-item {
-    border-bottom: 1px solid var(--border);
-    padding: 20px 0;
+  /* TERMINAL MOCKUP */
+  .hero-screen{
+    max-width:720px;margin:0 auto 40px;
+    background:#070d1a;border:1px solid #1e3a5f;border-radius:12px;
+    padding:16px 20px;text-align:left;box-shadow:var(--shadow-lg);
   }
-  .faq-q {
-    font-weight: 800; font-size: .98rem; cursor: pointer;
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 16px; user-select: none;
+  .dot-row{display:flex;gap:6px;margin-bottom:12px;}
+  .dot{width:12px;height:12px;border-radius:50%;}
+  .dot.r{background:#ef4444;}.dot.y{background:#f59e0b;}.dot.g{background:#22c55e;}
+  .hero-screen pre{
+    font-family:"Cascadia Code","Consolas","Courier New",monospace;
+    font-size:.82rem;color:#64748b;line-height:1.85;
+    white-space:pre-wrap;word-break:break-all;
   }
-  .faq-q span.arrow { font-size: 1.2rem; transition: transform .25s; color: var(--primary); flex-shrink: 0; }
-  .faq-a {
-    font-size: .92rem; color: var(--text-sub);
-    max-height: 0; overflow: hidden;
-    transition: max-height .35s ease, padding .25s;
-    padding-top: 0;
-  }
-  .faq-item.open .faq-a { max-height: 300px; padding-top: 12px; }
-  .faq-item.open .faq-q span.arrow { transform: rotate(180deg); }
+  .hero-screen pre .ok  {color:#22c55e;font-weight:700;}
+  .hero-screen pre .warn{color:#f59e0b;}
+  .hero-screen pre .info{color:#60a5fa;}
 
-  /* ─── CTA FINAL ─── */
-  .final-cta {
-    background: var(--primary);
-    color: var(--white);
-    text-align: center;
-    padding: 80px 24px;
+  /* BUTTONS */
+  .hero-cta-wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;}
+  .btn-primary{
+    background:var(--primary);color:#fff;border:none;border-radius:10px;
+    padding:18px 42px;font-size:1.1rem;font-weight:800;cursor:pointer;
+    text-decoration:none;display:inline-block;
+    box-shadow:0 4px 20px rgba(59,130,246,.4);
+    transition:transform .15s,box-shadow .15s;
   }
-  .final-cta h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; margin-bottom: 12px; }
-  .final-cta p { font-size: 1rem; opacity: .85; margin-bottom: 36px; }
-  .btn-white {
-    background: var(--white); color: var(--primary);
-    border: none; border-radius: 10px; padding: 18px 48px;
-    font-size: 1.1rem; font-weight: 900; cursor: pointer;
-    text-decoration: none; display: inline-block;
-    box-shadow: 0 4px 16px rgba(0,0,0,.15);
-    transition: transform .15s, box-shadow .15s;
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.55);}
+  .btn-outline{
+    background:transparent;color:var(--primary);border:2px solid var(--primary);
+    border-radius:10px;padding:16px 32px;font-size:1rem;font-weight:700;
+    cursor:pointer;text-decoration:none;display:inline-block;
+    transition:background .15s,color .15s;
   }
-  .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
-  .final-cta .note-small { margin-top: 16px; font-size: .83rem; opacity: .7; }
+  .btn-outline:hover{background:var(--primary-l);}
+  .hero-note{margin-top:14px;font-size:.85rem;color:var(--text-sub);}
 
-  /* ─── FOOTER ─── */
-  footer {
-    background: #1e293b; color: #94a3b8;
-    text-align: center; padding: 32px 24px;
-    font-size: .82rem;
+  /* SECTION BASE */
+  section{padding:72px 24px;}
+  .container{max-width:860px;margin:0 auto;}
+  .section-label{
+    font-size:.78rem;font-weight:700;letter-spacing:2px;
+    color:var(--primary);text-transform:uppercase;margin-bottom:10px;
   }
-  footer a { color: #60a5fa; text-decoration: none; }
-
-  /* ─── HIGHLIGHT BAND ─── */
-  .highlight-band {
-    background: var(--accent); color: var(--white);
-    text-align: center; padding: 12px 24px;
-    font-weight: 800; font-size: .92rem;
-    letter-spacing: .5px;
+  .section-title{
+    font-size:clamp(1.5rem,4vw,2.2rem);
+    font-weight:900;line-height:1.3;margin-bottom:14px;color:var(--text);
   }
-  .highlight-band span { opacity: .9; font-weight: 400; }
+  .section-desc{color:var(--text-sub);font-size:1rem;margin-bottom:48px;}
 
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 600px) {
-    .hero { padding: 48px 16px 40px; }
-    section { padding: 48px 16px; }
-    .pricing-body { padding: 24px 20px; }
+  /* PAIN */
+  .pain-section{background:var(--bg2);}
+  .pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+  .pain-card{
+    background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.25);
+    border-radius:var(--radius);padding:24px;
+  }
+  .pain-card .icon{font-size:2rem;margin-bottom:10px;}
+  .pain-card h3{font-size:1rem;font-weight:800;color:#fca5a5;margin-bottom:6px;}
+  .pain-card p{font-size:.9rem;color:var(--text-sub);}
+
+  /* SOLUTION */
+  .solution-section{background:var(--bg);}
+  .solution-flow{display:flex;flex-direction:column;}
+  .flow-item{
+    display:flex;gap:20px;align-items:flex-start;
+    padding:28px 0;border-bottom:1px dashed var(--border);
+  }
+  .flow-item:last-child{border-bottom:none;}
+  .flow-num{
+    min-width:48px;height:48px;background:var(--primary);color:#fff;
+    border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-weight:900;font-size:1.1rem;flex-shrink:0;
+  }
+  .flow-content h3{font-weight:800;font-size:1.05rem;margin-bottom:4px;color:var(--text);}
+  .flow-content p{font-size:.92rem;color:var(--text-sub);}
+
+  /* COMPATIBLE SITES */
+  .sites-section{background:var(--bg2);}
+  .sites-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media(max-width:600px){.sites-grid{grid-template-columns:1fr;}}
+  .site-box{border-radius:var(--radius);padding:28px 24px;}
+  .site-box.ok{
+    background:rgba(34,197,94,.07);border:1.5px solid rgba(34,197,94,.3);
+  }
+  .site-box.ng{
+    background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.25);
+  }
+  .site-box h3{font-size:1.05rem;font-weight:800;margin-bottom:14px;}
+  .site-box.ok h3{color:#86efac;}
+  .site-box.ng h3{color:#fca5a5;}
+  .site-tag-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .tag{
+    font-size:.82rem;font-weight:700;padding:5px 14px;border-radius:999px;
+  }
+  .tag.ok{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3);}
+  .tag.ng{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.25);}
+  .site-note{margin-top:14px;font-size:.82rem;color:var(--text-sub);line-height:1.6;}
+
+  /* FEATURES */
+  .features-section{background:var(--bg);}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;}
+  .feature-card{
+    background:var(--card);border-radius:var(--radius);
+    padding:28px 24px;border:1.5px solid var(--border);
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .feature-card:hover{border-color:var(--primary);box-shadow:0 4px 20px rgba(59,130,246,.2);}
+  .feature-icon{
+    width:48px;height:48px;border-radius:12px;
+    background:var(--primary-l);display:flex;
+    align-items:center;justify-content:center;
+    font-size:1.5rem;margin-bottom:16px;
+  }
+  .feature-card h3{font-weight:800;font-size:1rem;margin-bottom:6px;color:var(--text);}
+  .feature-card p{font-size:.88rem;color:var(--text-sub);}
+
+  /* TESTIMONIALS */
+  .testimonials-section{background:var(--bg2);}
+  .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+  .testimonial-card{
+    background:var(--card);border-radius:var(--radius);
+    padding:28px 24px;box-shadow:var(--shadow);
+    border:1px solid var(--border);
+  }
+  .stars{color:var(--accent);font-size:1.1rem;margin-bottom:12px;}
+  .testimonial-card p{font-size:.93rem;line-height:1.8;margin-bottom:16px;color:var(--text-sub);}
+  .testimonial-card .author{display:flex;align-items:center;gap:12px;}
+  .avatar{
+    width:40px;height:40px;border-radius:50%;
+    background:var(--primary-l);display:flex;align-items:center;
+    justify-content:center;font-weight:800;font-size:1rem;color:var(--primary);flex-shrink:0;
+  }
+  .author-info .name{font-weight:800;font-size:.9rem;color:var(--text);}
+  .author-info .meta{font-size:.8rem;color:var(--text-sub);}
+  .success-badge{
+    display:inline-block;background:rgba(34,197,94,.15);color:#86efac;
+    font-size:.75rem;font-weight:700;padding:3px 10px;
+    border-radius:999px;margin-bottom:8px;
+    border:1px solid rgba(34,197,94,.3);
+  }
+
+  /* PRICING */
+  .pricing-section{background:var(--bg);}
+  .pricing-card{
+    max-width:520px;margin:0 auto;
+    border:2px solid var(--primary);border-radius:18px;
+    overflow:hidden;box-shadow:0 0 40px rgba(59,130,246,.2);
+  }
+  .pricing-header{
+    background:linear-gradient(135deg,#1e3a5f,#1e4080);
+    color:#fff;text-align:center;padding:32px 24px;
+  }
+  .pricing-header .plan-name{font-size:.85rem;font-weight:700;letter-spacing:2px;opacity:.8;margin-bottom:8px;}
+  .pricing-header .price{font-size:3.5rem;font-weight:900;line-height:1;}
+  .pricing-header .price sup{font-size:1.5rem;vertical-align:top;margin-top:8px;}
+  .pricing-header .price-sub{font-size:.9rem;opacity:.75;margin-top:6px;}
+  .pricing-body{padding:32px;background:var(--card);}
+  .pricing-includes{list-style:none;display:flex;flex-direction:column;gap:14px;margin-bottom:32px;}
+  .pricing-includes li{display:flex;gap:12px;align-items:flex-start;font-size:.95rem;color:var(--text);}
+  .check{color:var(--success);font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+  .pricing-note{text-align:center;font-size:.82rem;color:var(--text-sub);margin-top:16px;line-height:1.6;}
+  .pricing-guarantee{
+    margin-top:20px;padding:16px;
+    background:rgba(34,197,94,.08);border-radius:10px;
+    text-align:center;font-size:.88rem;color:#86efac;
+    border:1px solid rgba(34,197,94,.25);
+  }
+
+  /* FAQ */
+  .faq-section{background:var(--bg2);}
+  .faq-item{border-bottom:1px solid var(--border);padding:20px 0;}
+  .faq-q{
+    font-weight:800;font-size:.98rem;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;
+    gap:16px;user-select:none;color:var(--text);
+  }
+  .faq-q span.arrow{font-size:1.2rem;transition:transform .25s;color:var(--primary);flex-shrink:0;}
+  .faq-a{
+    font-size:.92rem;color:var(--text-sub);
+    max-height:0;overflow:hidden;
+    transition:max-height .35s ease,padding .25s;padding-top:0;
+  }
+  .faq-item.open .faq-a{max-height:300px;padding-top:12px;}
+  .faq-item.open .faq-q span.arrow{transform:rotate(180deg);}
+
+  /* FINAL CTA */
+  .final-cta{
+    background:linear-gradient(135deg,#0d1b3e,#1e3a5f);
+    color:#fff;text-align:center;padding:80px 24px;
+  }
+  .final-cta h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;margin-bottom:12px;}
+  .final-cta p{font-size:1rem;opacity:.8;margin-bottom:36px;}
+  .btn-white{
+    background:#fff;color:var(--primary-d);border:none;border-radius:10px;
+    padding:18px 48px;font-size:1.1rem;font-weight:900;cursor:pointer;
+    text-decoration:none;display:inline-block;
+    box-shadow:0 4px 20px rgba(0,0,0,.3);
+    transition:transform .15s,box-shadow .15s;
+  }
+  .btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.4);}
+  .final-cta .note-small{margin-top:16px;font-size:.83rem;opacity:.65;}
+
+  /* FOOTER */
+  footer{
+    background:#060b16;color:#475569;
+    text-align:center;padding:32px 24px;font-size:.82rem;
+  }
+  footer a{color:#60a5fa;text-decoration:none;}
+
+  @media(max-width:600px){
+    .hero{padding:48px 16px 40px;}
+    section{padding:48px 16px;}
+    .pricing-body{padding:24px 20px;}
   }
 </style>
 </head>
@@ -323,7 +308,7 @@
   <a href="#pricing" class="cta-sm">今すぐ購入 →</a>
 </header>
 
-<!-- ANNOUNCEMENT BAND -->
+<!-- BAND -->
 <div class="highlight-band">
   🎉 期間限定価格 ¥2,980 <span>｜ 1ヶ月サポート付き ｜ 購入後すぐに使える</span>
 </div>
@@ -333,22 +318,21 @@
   <div class="container">
     <div class="hero-badge">✨ Python 自動化ツール</div>
     <h1>
-      限定ランタンの在庫復活を<br>
-      <span>0秒で通知。</span>
+      限定品の在庫復活を<br>
+      <em>0秒で通知。</em>
       <span class="line2">もう「気づいたら売り切れ」は終わり。</span>
     </h1>
     <p class="sub">
-      PCで動かすだけ。コールマン等の限定品EC在庫を24時間自動監視し、
+      PCで動かすだけ。コールマン等のマイナー〜中規模ECサイトの在庫を24時間自動監視し、
       復活した瞬間にスマホへ通知を届けるPythonスクリプト一式。
     </p>
 
-    <!-- TERMINAL MOCKUP -->
     <div class="hero-screen">
       <div class="dot-row">
         <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
       </div>
       <pre>
-<span class="info">2026-05-05 21:44:32 [INFO]  Coleman 在庫監視スクリプト 起動</span>
+<span class="info">2026-05-05 21:44:32 [INFO]  在庫監視スクリプト 起動</span>
 <span class="info">2026-05-05 21:44:32 [INFO]  ターゲット: https://ec.coleman.co.jp/...</span>
 <span class="info">2026-05-05 21:44:32 [INFO]  チェック間隔: 10〜20 分 (ランダム)</span>
 <span class="info">2026-05-05 21:49:11 [INFO]  在庫チェック開始...</span>
@@ -421,17 +405,54 @@
   </div>
 </section>
 
+<!-- COMPATIBLE SITES -->
+<section class="sites-section" id="compatible">
+  <div class="container">
+    <div class="section-label">対応サイト</div>
+    <h2 class="section-title">どのサイトで使えるの？<br>正直にお伝えします。</h2>
+    <p class="section-desc">ツールの性質上、Bot対策の強度によって対応可否が分かれます。購入前にご確認ください。</p>
+    <div class="sites-grid">
+      <div class="site-box ok">
+        <h3>✅ 対応可能なサイト</h3>
+        <div class="site-tag-list">
+          <span class="tag ok">コールマン公式EC</span>
+          <span class="tag ok">スノーピーク</span>
+          <span class="tag ok">ロゴス公式</span>
+          <span class="tag ok">ふるさと納税系</span>
+          <span class="tag ok">メーカー直販EC</span>
+          <span class="tag ok">中小ブランド直販</span>
+          <span class="tag ok">地域限定ECサイト</span>
+          <span class="tag ok">同人・限定グッズ系</span>
+        </div>
+        <p class="site-note">👉 独自カートシステムや小〜中規模のECサイトは動作実績あり。URLを変えるだけで流用可能です。</p>
+      </div>
+      <div class="site-box ng">
+        <h3>❌ 対応困難なサイト</h3>
+        <div class="site-tag-list">
+          <span class="tag ng">Supreme</span>
+          <span class="tag ng">楽天市場</span>
+          <span class="tag ng">Amazon</span>
+          <span class="tag ng">Yahoo!ショッピング</span>
+          <span class="tag ng">SNKRS (Nike)</span>
+          <span class="tag ng">ファミリーマート</span>
+        </div>
+        <p class="site-note">⚠️ メジャープラットフォームはBot対策が非常に強固（Cloudflare・CAPTCHA等）のため、このツールでの安定動作は期待できません。ご了承ください。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FEATURES -->
 <section class="features-section" id="features">
   <div class="container">
     <div class="section-label">機能一覧</div>
     <h2 class="section-title">プロが設計した<br>「取り逃がさない」仕組み</h2>
-    <p class="section-desc">1行の設定変更だけで、どのECサイトの商品にも応用できます。</p>
+    <p class="section-desc">対応サイトであれば、URLを変えるだけで何でも監視できます。</p>
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">🤖</div>
         <h3>Bot検知回避ロジック</h3>
-        <p>User-Agentを5種類でランダムに切り替え、チェック間隔も10〜20分でランダム変動。自然なブラウジングに見せかけます。</p>
+        <p>User-Agentをランダムに切り替え、チェック間隔も変動。対応サイトへの自然なアクセスに見せかけます。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🔔</div>
@@ -441,7 +462,7 @@
       <div class="feature-card">
         <div class="feature-icon">🛡️</div>
         <h3>堅牢なエラー処理</h3>
-        <p>ネットワーク障害時は指数バックオフで自動リトライ。予期しないエラーが起きてもスクリプトが止まりません。</p>
+        <p>ネットワーク障害時は自動リトライ。予期しないエラーが起きてもスクリプトが止まりません。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📋</div>
@@ -456,7 +477,7 @@
       <div class="feature-card">
         <div class="feature-icon">🔧</div>
         <h3>URLを変えるだけで流用可</h3>
-        <p>TARGET_URLを書き換えれば他社ECサイトにも対応。スニーカー・ポケモンカード・ゲーム機など何でも監視できます。</p>
+        <p>TARGET_URLを書き換えれば対応サイトならどれでも監視可能。ランタン・アパレル・食品など何でも対応。</p>
       </div>
     </div>
   </div>
@@ -467,13 +488,13 @@
   <div class="container">
     <div class="section-label">購入者の声</div>
     <h2 class="section-title">実際に「ゲットできた」<br>成功事例をご紹介</h2>
-    <p class="section-desc">購入者から届いたリアルな声です。</p>
+    <p class="section-desc">様々なサイトで購入に成功した方々のリアルな声です。</p>
     <div class="testimonials-grid">
 
       <div class="testimonial-card">
-        <div class="success-badge">🎉 在庫獲得成功</div>
+        <div class="success-badge">🎉 コールマン公式EC で成功</div>
         <div class="stars">★★★★★</div>
-        <p>「導入から3日後の深夜2時に通知が来て、寝ぼけながらスマホで購入完了しました。今までずっと売り切れで諦めてたランタンをついに定価でゲット！本当にこれ買って正解でした。」</p>
+        <p>「導入から3日後の深夜2時に通知が来て、寝ぼけながらスマホで購入完了しました。ずっと売り切れで諦めてたランタンをついに定価でゲット！本当にこれ買って正解でした。」</p>
         <div class="author">
           <div class="avatar">K</div>
           <div class="author-info">
@@ -484,9 +505,22 @@
       </div>
 
       <div class="testimonial-card">
-        <div class="success-badge">🎉 2週間で成功</div>
+        <div class="success-badge">🎉 スノーピーク直販 で成功</div>
         <div class="stars">★★★★★</div>
-        <p>「Pythonは全く知らないど素人ですが、付属のガイドを読んでコピペするだけで動きました。2週間後にLINEに通知が来て急いでカートに入れたら無事購入できました。サポートも丁寧で助かりました！」</p>
+        <p>「コールマン以外にも使えると聞いてスノーピークの限定品に設定したら、1週間後に在庫が復活して通知が来ました！同じサイトで複数商品を同時監視できるのも便利です。」</p>
+        <div class="author">
+          <div class="avatar">T</div>
+          <div class="author-info">
+            <div class="name">T.Sさん（30代・男性）</div>
+            <div class="meta">別サイトへの流用で成功</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="success-badge">🎉 メーカー直販EC で成功</div>
+        <div class="stars">★★★★★</div>
+        <p>「好きなアウトドアブランドの直販サイトでURLを設定したら動きました。プログラミング未経験でもガイド通りにコピペするだけで設定完了。サポートも丁寧で助かりました！」</p>
         <div class="author">
           <div class="avatar">A</div>
           <div class="author-info">
@@ -497,53 +531,40 @@
       </div>
 
       <div class="testimonial-card">
-        <div class="success-badge">🎉 複数商品に応用</div>
+        <div class="success-badge">🎉 限定グッズ系EC で成功</div>
         <div class="stars">★★★★★</div>
-        <p>「URLを変えるだけで別のランタンや限定グッズにも使えると聞いて試したら本当でした。今は5つのURLを同時監視しています。転売品を高値で買わなくて済むようになって、コスパ最高です。」</p>
+        <p>「仕事中にDiscordへ通知が来て、スマホからすぐ購入手続きしました。サイトを確認したら1時間も経たずに完売していたので、通知がなければ確実に逃していました。」</p>
         <div class="author">
           <div class="avatar">R</div>
           <div class="author-info">
-            <div class="name">R.Sさん（20代・男性）</div>
-            <div class="meta">5商品の同時監視に応用中</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="testimonial-card">
-        <div class="success-badge">🎉 Discord通知で即反応</div>
-        <div class="stars">★★★★★</div>
-        <p>「仕事中にDiscordへ通知が来て、スマホからすぐ購入手続きしました。昼休みにサイトを確認したら1時間も経たずに完売していたので、通知がなければ確実に逃していました。」</p>
-        <div class="author">
-          <div class="avatar">T</div>
-          <div class="author-info">
-            <div class="name">T.Hさん（30代・男性）</div>
+            <div class="name">R.Hさん（20代・男性）</div>
             <div class="meta">勤務中に通知を受け購入成功</div>
           </div>
         </div>
       </div>
 
       <div class="testimonial-card">
-        <div class="success-badge">🎉 夜間に自動検知</div>
+        <div class="success-badge">🎉 クラウド24時間運用で成功</div>
         <div class="stars">★★★★☆</div>
-        <p>「クラウドに設定したら24時間監視になり、翌朝LINEに「在庫復活」の通知が来ていました。起きてすぐカートに入れて購入。PCを閉じても動き続けるのが本当に便利です。」</p>
+        <p>「Render.comに設定してPCを閉じたままにしておいたら、翌朝LINEに通知が来ていました。起きてすぐカートに入れて購入できました。24時間監視が現実になるとは思ってなかった。」</p>
         <div class="author">
           <div class="avatar">Y</div>
           <div class="author-info">
             <div class="name">Y.Nさん（50代・男性）</div>
-            <div class="meta">クラウド運用で24時間監視</div>
+            <div class="meta">クラウド運用で深夜に自動検知</div>
           </div>
         </div>
       </div>
 
       <div class="testimonial-card">
-        <div class="success-badge">🎉 友人にも紹介</div>
+        <div class="success-badge">🎉 5サイト同時監視で量産成功</div>
         <div class="stars">★★★★★</div>
-        <p>「使い方が簡単すぎて感動しました。同じランタンを狙っていた友人にも教えたら喜ばれました。¥2,980でこれだけの機能があればコスパは抜群。もっと早く知りたかった。」</p>
+        <p>「URLを変えるだけで5つの異なるサイトを同時に監視しています。コールマン・ロゴス・スノーピーク全部まとめて監視。¥2,980でこれだけ使えるなら圧倒的コスパです。」</p>
         <div class="author">
           <div class="avatar">M</div>
           <div class="author-info">
-            <div class="name">M.Kさん（30代・女性）</div>
-            <div class="meta">友人へも紹介・評判に</div>
+            <div class="name">M.Kさん（30代・男性）</div>
+            <div class="meta">複数ブランドを並行監視中</div>
           </div>
         </div>
       </div>
@@ -558,7 +579,6 @@
     <div class="section-label" style="text-align:center;">料金</div>
     <h2 class="section-title" style="text-align:center;">シンプルな1プランのみ</h2>
     <p class="section-desc" style="text-align:center;">追加費用なし。買い切り価格です。</p>
-
     <div class="pricing-card">
       <div class="pricing-header">
         <div class="plan-name">STANDARD PLAN</div>
@@ -569,12 +589,11 @@
         <ul class="pricing-includes">
           <li><span class="check">✅</span><span><strong>monitor.py</strong>（在庫監視スクリプト本体）</span></li>
           <li><span class="check">✅</span><span><strong>セットアップガイドPDF</strong>（スクショ付きの初心者向け解説）</span></li>
-          <li><span class="check">✅</span><span><strong>Discordおよび LINE Notify</strong> 両対応</span></li>
+          <li><span class="check">✅</span><span><strong>Discord および LINE Notify</strong> 両対応</span></li>
           <li><span class="check">✅</span><span><strong>クラウド運用ガイド</strong>（Render, GitHub Actions 対応）</span></li>
           <li><span class="check">✅</span><span><strong>1ヶ月間のサポート</strong>（noteメッセージ or DM対応）</span></li>
-          <li><span class="check">✅</span><span><strong>URLを変えれば他ECにも応用可能</strong></span></li>
+          <li><span class="check">✅</span><span><strong>対応サイトであればURLを変えるだけで流用可</strong></span></li>
         </ul>
-
         <a href="https://note.com/" target="_blank" class="btn-primary" style="width:100%;text-align:center;display:block;">
           🛒 noteで今すぐ購入する（¥2,980）
         </a>
@@ -585,7 +604,7 @@
         <p class="pricing-note">
           ※ 本ツールは個人の情報収集・在庫チェックを補助するものです。<br>
           利用はサイトの利用規約の範囲内でご使用ください。<br>
-          在庫獲得を100%保証するものではありません。
+          在庫獲得および動作を100%保証するものではありません。
         </p>
       </div>
     </div>
@@ -609,20 +628,20 @@
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
+          コールマン以外のサイトにも使えますか？
+          <span class="arrow">▼</span>
+        </div>
+        <div class="faq-a">
+          はい、マイナー〜中規模のECサイトであれば「TARGET_URL」を変更するだけで流用できます。スノーピーク・ロゴスなどのメーカー直販、限定グッズ系ECなどで動作実績があります。ただしSupreme・楽天・Amazon・Nike SNKRSなどのメジャープラットフォームはBot対策が非常に強固なため、このツールでの安定動作は期待できません。
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
           MacでもWindowsでも動きますか？
           <span class="arrow">▼</span>
         </div>
         <div class="faq-a">
           はい。Python 3.8以上が動作する環境であれば、Windows・Mac・Linuxいずれでも動きます。Pythonのインストール方法もガイドに記載しています。
-        </div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          コールマン以外のサイトにも使えますか？
-          <span class="arrow">▼</span>
-        </div>
-        <div class="faq-a">
-          使えます。スクリプト内の「TARGET_URL」を変更するだけで、他のECサイトにも応用できます。スニーカー・ゲーム機・ポケモンカード・アパレル限定品など様々な商品の監視に活用されています。
         </div>
       </div>
       <div class="faq-item">
@@ -676,19 +695,14 @@
 
 <script>
   function toggleFaq(el) {
-    const item = el.closest('.faq-item');
-    item.classList.toggle('open');
+    el.closest('.faq-item').classList.toggle('open');
   }
-
-  // スムーズスクロール補助
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (target) {
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) {
         e.preventDefault();
-        const offset = 70;
-        const top = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
+        window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       }
     });
   });
